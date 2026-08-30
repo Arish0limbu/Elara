@@ -86,6 +86,10 @@ class AISettings:
     max_tokens: int = AI_MAX_TOKENS
     temperature: float = AI_TEMPERATURE
     base_url: Optional[str] = None
+    conversation_style: str = "casual"
+    max_history_length: int = 20
+    enable_llm: bool = False
+    use_rule_based_fallback: bool = True
 
 
 @dataclass
@@ -182,7 +186,11 @@ class Settings:
                 model=os.getenv("AI_MODEL", DEFAULT_AI_MODEL),
                 max_tokens=int(os.getenv("AI_MAX_TOKENS", str(AI_MAX_TOKENS))),
                 temperature=float(os.getenv("AI_TEMPERATURE", str(AI_TEMPERATURE))),
-                base_url=os.getenv("AI_BASE_URL")
+                base_url=os.getenv("AI_BASE_URL"),
+                conversation_style=os.getenv("AI_CONVERSATION_STYLE", "casual"),
+                max_history_length=int(os.getenv("AI_MAX_HISTORY_LENGTH", "20")),
+                enable_llm=os.getenv("AI_ENABLE_LLM", "false").lower() == "true",
+                use_rule_based_fallback=os.getenv("AI_USE_RULE_BASED_FALLBACK", "true").lower() == "true"
             ),
             security=SecuritySettings(
                 workspace=Path(os.getenv("ELARA_WORKSPACE", str(DEFAULT_WORKSPACE))),
