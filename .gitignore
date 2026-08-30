@@ -1,0 +1,274 @@
+# ELARA - Git Ignore File
+# This file specifies intentionally untracked files that Git should ignore
+
+# ============================================
+# Environment & Configuration
+# ============================================
+.env
+.env.local
+.env.*.local
+config.local.json
+
+# ============================================
+# Python
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ============================================
+# Virtual Environments
+# ============================================
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+.env.venv
+
+# ============================================
+# IDE & Editor
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+.codeium/
+.claude/
+.cursor/
+
+# ============================================
+# Testing & Coverage
+# ============================================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+*.cover
+coverage.xml
+*.log
+
+# ============================================
+# Database
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+
+# ============================================
+# Logs
+# ============================================
+logs/
+*.log
+*.log.*
+
+# ============================================
+# User Data & Workspace
+# ============================================
+workspace/
+user_data/
+temp/
+tmp/
+*.tmp
+
+# ============================================
+# Models & Data
+# ============================================
+models/*.bin
+models/*.onnx
+models/*.pt
+models/*.pth
+models/*.ckpt
+data/*.csv
+data/*.json
+data/*.pkl
+data/*.pickle
+
+# ============================================
+# Audio Files
+# ============================================
+*.wav
+*.mp3
+*.ogg
+*.flac
+*.m4a
+audio/
+recordings/
+
+# ============================================
+# Images & Screenshots
+# ============================================
+screenshots/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+
+# ============================================
+# OS Specific
+# ============================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Linux
+*~
+.directory
+.Trash-*
+.nfs*
+
+# ============================================
+# Package Managers
+# ============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# ============================================
+# Build & Packaging
+# ============================================
+*.exe
+*.msi
+*.dmg
+*.pkg
+*.deb
+*.rpm
+build/
+dist/
+*.spec
+PyInstaller/
+
+# ============================================
+# Secrets & Keys
+# ============================================
+secrets/
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+credentials.json
+service-account.json
+
+# ============================================
+# Backup Files
+# ============================================
+*.bak
+*.backup
+*.old
+*~
+backups/
+
+# ============================================
+# Cache & Temporary
+# ============================================
+.cache/
+cache/
+tmp/
+temp/
+*.tmp
+*.temp
+
+# ============================================
+# Documentation Build
+# ============================================
+docs/_build/
+docs/.doctrees/
+site/
+
+# ============================================
+# Jupyter Notebooks
+# ============================================
+.ipynb_checkpoints/
+*.ipynb
+
+# ============================================
+# MyPy
+# ============================================
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# ============================================
+# Black
+# ============================================
+.black/
+
+# ============================================
+# Ruff
+# ============================================
+.ruff_cache/
+
+# ============================================
+# ELARA Specific
+# ============================================
+# User-specific data
+user_profiles/
+voice_embeddings/
+application_state/
+
+# Sensitive configuration
+ai_config.local.json
+voice_config.local.json
+security_config.local.json
+
+# Runtime data
+runtime/
+session/
+state/
+
+# Development
+dev/
+.local/
