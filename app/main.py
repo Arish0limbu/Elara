@@ -143,6 +143,27 @@ class ElaraApp(QObject):
         self.voice_enrollment = None
         self.speaker_verifier = None
         self.voice_profile_manager = None
+        
+        # Action components
+        self.action_registry = None
+        self.permission_engine = None
+        self.security_policy = None
+        self.confirmation_engine = None
+        self.action_executor = None
+        
+        # Windows automation components
+        self.application_manager = None
+        self.window_manager = None
+        self.volume_controller = None
+        self.screenshot_capture = None
+        self.system_operations = None
+        
+        # AI components
+        self.ai_manager = None
+        self.intent_parser = None
+        self.llm_manager = None
+        self.action_generator = None
+        self.response_generator = None
     
     def _get_audio_components(self):
         """Get audio component references from lifecycle manager."""
@@ -158,10 +179,31 @@ class ElaraApp(QObject):
         self.speaker_verifier = self.lifecycle_manager.speaker_verifier
         self.voice_profile_manager = self.lifecycle_manager.voice_profile_manager
         
+        # Get action components
+        self.action_registry = self.lifecycle_manager.action_registry
+        self.permission_engine = self.lifecycle_manager.permission_engine
+        self.security_policy = self.lifecycle_manager.security_policy
+        self.confirmation_engine = self.lifecycle_manager.confirmation_engine
+        self.action_executor = self.lifecycle_manager.action_executor
+        
+        # Get Windows automation components
+        self.application_manager = self.lifecycle_manager.application_manager
+        self.window_manager = self.lifecycle_manager.window_manager
+        self.volume_controller = self.lifecycle_manager.volume_controller
+        self.screenshot_capture = self.lifecycle_manager.screenshot_capture
+        self.system_operations = self.lifecycle_manager.system_operations
+        
+        # Get AI components
+        self.ai_manager = self.lifecycle_manager.ai_manager
+        self.intent_parser = self.lifecycle_manager.intent_parser
+        self.llm_manager = self.lifecycle_manager.llm_manager
+        self.action_generator = self.lifecycle_manager.action_generator
+        self.response_generator = self.lifecycle_manager.response_generator
+        
         if self.microphone is None:
             self.logger.warning("Microphone not available (PortAudio may not be installed)")
         
-        self.logger.info("Audio and authentication components references obtained")
+        self.logger.info("Audio, authentication, action, Windows automation, and AI components references obtained")
     
     def _signal_handler(self, signum, frame):
         """Handle shutdown signals."""
