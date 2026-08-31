@@ -318,13 +318,13 @@ class LifecycleManager:
         try:
             from app.ai import AIManager, IntentParser, LLMProviderManager, ActionGenerator, ResponseGenerator
             
-            # Initialize AI manager with action components
+            # Initialize AI manager with action components (using existing action executor)
             self.ai_manager = AIManager(
                 action_registry=self.action_registry,
                 permission_engine=self.permission_engine,
                 security_policy=self.security_policy,
                 confirmation_engine=self.confirmation_engine,
-                action_executor=self.action_executor
+                action_executor=self.action_executor  # Use the same executor with registered handlers
             )
             self.logger.info("AI manager initialized")
             

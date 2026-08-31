@@ -76,7 +76,7 @@ class AIManager:
         self.permission_engine = permission_engine or PermissionEngine()
         self.security_policy = security_policy or SecurityPolicy()
         self.confirmation_engine = confirmation_engine or ConfirmationEngine()
-        self.action_executor = action_executor or ActionExecutor()
+        self.action_executor = action_executor or ActionExecutor()  # Use provided executor or create new one
         
         # Conversation history
         self.conversation_history: List[Dict[str, str]] = []
