@@ -270,16 +270,9 @@ class ElaraApp(QObject):
                     error = response.action_result.get("error", "Unknown error")
                     self.main_window.show_error(error)
             
-            # Speak response (optional for UI commands)
-            if self.voice_loop and response.response_text:
-                try:
-                    self.voice_loop.speak(response.response_text)
-                except Exception as e:
-                    self.logger.error(f"Error speaking response: {e}")
-            
             # Reset status
             self.main_window.set_status(AssistantStatus.IDLE)
-            
+        
         except Exception as e:
             self.logger.error(f"Error processing UI command: {e}")
             self.main_window.show_error(str(e))
@@ -333,20 +326,7 @@ class ElaraApp(QObject):
                     # Reset status after speaking
                     if self.main_window:
                         self.main_window.set_status(AssistantStatus.IDLE)
-            
-            # Speak response
-            if self.voice_loop and response.response_text:
-                # Update UI to show speaking status
-                if self.main_window:
-                    self.main_window.set_status(AssistantStatus.SPEAKING)
-                
-                try:
-                    self.voice_loop.speak(response.response_text)
-                finally:
-                    # Reset status after speaking
-                    if self.main_window:
-                        self.main_window.set_status(AssistantStatus.IDLE)
-            
+        
         except Exception as e:
             self.logger.error(f"Error processing voice command: {e}")
             if self.main_window:
