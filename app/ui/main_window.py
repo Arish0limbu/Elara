@@ -40,6 +40,7 @@ class MainWindow(QMainWindow):
     # Signals for communication
     command_received = Signal(str)
     status_changed = Signal(str)
+    toggle_listening = Signal(bool)
     
     def __init__(self):
         super().__init__()
@@ -322,11 +323,13 @@ class MainWindow(QMainWindow):
             self.voice_indicator.setText("●")
             self.voice_indicator.setStyleSheet("color: #00ff00;")
             self.set_status(AssistantStatus.LISTENING)
+            self.toggle_listening.emit(True)
         else:
             self.mic_button.setText("🎤 Start Listening")
             self.voice_indicator.setText("○")
             self.voice_indicator.setStyleSheet("color: #888888;")
             self.set_status(AssistantStatus.IDLE)
+            self.toggle_listening.emit(False)
     
     def _on_mute_button_clicked(self):
         """Handle mute button click."""

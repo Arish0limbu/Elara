@@ -57,6 +57,9 @@ class LifecycleManager:
         self.llm_manager = None
         self.action_generator = None
         self.response_generator = None
+        
+        # Voice loop component (will be initialized during startup)
+        self.voice_loop = None
     
     def initialize(self) -> None:
         """Initialize the application lifecycle."""
@@ -115,6 +118,9 @@ class LifecycleManager:
         
         # Phase 8: AI components
         self._startup_phase_ai_integration()
+        
+        # Phase 9: Voice loop initialization
+        self._startup_phase_voice_loop()
         
         self.logger.info("Startup sequence completed")
     
@@ -339,6 +345,36 @@ class LifecycleManager:
         except Exception as e:
             self.logger.error(f"Failed to initialize AI components: {e}")
             raise
+    
+    def _startup_phase_voice_loop(self) -> None:
+        """Initialize voice loop component."""
+        try:
+            self.logger.info("Phase 9: Initializing voice loop component")
+            
+            from app.core.voice_loop import VoiceLoop
+            
+            # Create voice loop
+            self.voice_loop = VoiceLoop()
+            
+            # Set voice components
+            self.voice_loop.set_components(
+                microphone=self.microphone,
+                vad=self.vad,
+                stt=self.stt,
+                wake_word_detector=self.wake_word_detector,
+                voice_enrollment=self.voice_enrollment,
+                speaker_verifier=self.speaker_verifier,
+                ai_manager=self.ai_manager,
+                tts=self.tts
+            )
+            
+            self.logger.info("Voice loop initialized")
+            
+        except Exception as e:
+            self.logger.error(f"Error initializing voice loop: {e}")
+            raise RuntimeError(
+                f"Error in Phase 9: {e}"
+            )
     
     def _handle_open_application(self, application: str, args: Optional[list] = None) -> dict:
         """Handle open application action."""

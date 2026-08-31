@@ -19,6 +19,7 @@ from app.memory.database import initialize_database
 from app.core.lifecycle import LifecycleManager
 from app.core.state import StateManager
 from app.core.event_bus import EventBus
+from app.ui import MainWindow, PYSIDE6_AVAILABLE, AssistantStatus
 
 
 class ElaraApp(QObject):
@@ -164,6 +165,12 @@ class ElaraApp(QObject):
         self.llm_manager = None
         self.action_generator = None
         self.response_generator = None
+        
+        # UI components
+        self.main_window = None
+        
+        # Voice loop component
+        self.voice_loop = None
     
     def _get_audio_components(self):
         """Get audio component references from lifecycle manager."""
@@ -200,10 +207,151 @@ class ElaraApp(QObject):
         self.action_generator = self.lifecycle_manager.action_generator
         self.response_generator = self.lifecycle_manager.response_generator
         
+        # Get voice loop component
+        self.voice_loop = self.lifecycle_manager.voice_loop
+        
         if self.microphone is None:
             self.logger.warning("Microphone not available (PortAudio may not be installed)")
         
-        self.logger.info("Audio, authentication, action, Windows automation, and AI components references obtained")
+        self.logger.info("Audio, authentication, action, Windows automation, AI, and voice loop components references obtained")
+    
+    def _connect_ui_signals(self):
+        """Connect UI signals to AI system."""
+        if not self.main_window or not self.ai_manager:
+            return
+        
+        # Connect command signals
+        self.main_window.command_received.connect(self._on_ui_command)
+        self.main_window.status_changed.connect(self._on_status_changed)
+        
+        # Connect voice loop to UI
+        if self.voice_loop:
+            self.voice_loop.set_command_callback(self._on_voice_command)
+            self.main_window.toggle_listening.connect(self._on_toggle_listening)
+        
+        self.logger.info("UI signals connected to AI system")
+    
+    def _on_toggle_listening(self, start: bool):
+        """Handle toggle listening from UI."""
+        if not self.voice_loop:
+            return
+        
+        if start:
+            self.voice_loop.start_listening()
+            self.logger.info("Voice listening started from UI")
+        else:
+            self.voice_loop.stop_listening()
+            self.logger.info("Voice listening stopped from UI")
+    
+    def _on_ui_command(self, command: str):
+        """Handle command from UI."""
+        try:
+            self.logger.info(f"UI command received: {command}")
+            
+            # Set processing status
+            self.main_window.set_status(AssistantStatus.PROCESSING)
+            self.main_window.update_last_action("Processing...")
+            
+            # Process through AI manager
+            from app.ai import AIRequest
+            request = AIRequest(user_input=command)
+            response = self.ai_manager.process_request(request)
+            
+            # Update UI with response
+            self.main_window.add_response(response.response_text)
+            
+            if response.generated_action:
+                self.main_window.update_last_action(response.generated_action.action_name)
+            
+            # Update action result
+            if response.action_result:
+                success = response.action_result.get("success", False)
+                if not success:
+                    error = response.action_result.get("error", "Unknown error")
+                    self.main_window.show_error(error)
+            
+            # Speak response (optional for UI commands)
+            if self.voice_loop and response.response_text:
+                try:
+                    self.voice_loop.speak(response.response_text)
+                except Exception as e:
+                    self.logger.error(f"Error speaking response: {e}")
+            
+            # Reset status
+            self.main_window.set_status(AssistantStatus.IDLE)
+            
+        except Exception as e:
+            self.logger.error(f"Error processing UI command: {e}")
+            self.main_window.show_error(str(e))
+            self.main_window.set_status(AssistantStatus.ERROR)
+    
+    def _on_status_changed(self, status: str):
+        """Handle status change from UI."""
+        self.logger.info(f"Status changed: {status}")
+        # Could trigger additional status handling here
+    
+    def _on_voice_command(self, command: str):
+        """Handle command from voice loop."""
+        try:
+            self.logger.info(f"Voice command received: {command}")
+            
+            # Set processing status
+            if self.main_window:
+                self.main_window.set_status(AssistantStatus.PROCESSING)
+                self.main_window.update_last_action("Processing...")
+            
+            # Process through AI manager
+            from app.ai import AIRequest
+            request = AIRequest(user_input=command)
+            response = self.ai_manager.process_request(request)
+            
+            # Update UI with response
+            if self.main_window:
+                self.main_window.add_response(response.response_text)
+            
+            if response.generated_action:
+                if self.main_window:
+                    self.main_window.update_last_action(response.generated_action.action_name)
+            
+            # Update action result
+            if response.action_result:
+                success = response.action_result.get("success", False)
+                if not success:
+                    error = response.action_result.get("error", "Unknown error")
+                    if self.main_window:
+                        self.main_window.show_error(error)
+            
+            # Speak response (for voice commands)
+            if self.voice_loop and response.response_text:
+                # Update UI to show speaking status
+                if self.main_window:
+                    self.main_window.set_status(AssistantStatus.SPEAKING)
+                
+                try:
+                    self.voice_loop.speak(response.response_text)
+                finally:
+                    # Reset status after speaking
+                    if self.main_window:
+                        self.main_window.set_status(AssistantStatus.IDLE)
+            
+            # Speak response
+            if self.voice_loop and response.response_text:
+                # Update UI to show speaking status
+                if self.main_window:
+                    self.main_window.set_status(AssistantStatus.SPEAKING)
+                
+                try:
+                    self.voice_loop.speak(response.response_text)
+                finally:
+                    # Reset status after speaking
+                    if self.main_window:
+                        self.main_window.set_status(AssistantStatus.IDLE)
+            
+        except Exception as e:
+            self.logger.error(f"Error processing voice command: {e}")
+            if self.main_window:
+                self.main_window.show_error(str(e))
+                self.main_window.set_status(AssistantStatus.ERROR)
     
     def _signal_handler(self, signum, frame):
         """Handle shutdown signals."""
@@ -227,6 +375,15 @@ class ElaraApp(QObject):
             
             # Get audio component references
             self._get_audio_components()
+            
+            # Create and setup main window
+            if PYSIDE6_AVAILABLE:
+                self.main_window = MainWindow()
+                self._connect_ui_signals()
+                self.main_window.show()
+                self.logger.info("Main window displayed")
+            else:
+                self.logger.warning("PySide6 not available, running in headless mode")
             
             # Start the application
             self.logger.info("ELARA application started")
