@@ -5,6 +5,7 @@ Demonstrates the AI system working with predefined commands.
 
 import sys
 import os
+from typing import Optional
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -20,14 +21,31 @@ def main():
     print("=" * 60)
     print()
     
-    # Initialize AI system
+    # Initialize AI system with action executor that has handlers
     action_registry = ActionRegistry()
+    action_executor = ActionExecutor()
+    
+    # Register handlers like the lifecycle manager does
+    def handle_open_application(application: str, args: Optional[list] = None) -> dict:
+        return {"launched": True, "application": application}
+    
+    def handle_mute() -> dict:
+        return {"muted": True}
+    
+    def handle_get_time() -> dict:
+        from datetime import datetime
+        return {"time": datetime.now().strftime("%H:%M:%S")}
+    
+    action_executor.register_handler("open_application", handle_open_application)
+    action_executor.register_handler("mute", handle_mute)
+    action_executor.register_handler("get_time", handle_get_time)
+    
     ai_manager = AIManager(
         action_registry=action_registry,
         permission_engine=PermissionEngine(),
         security_policy=SecurityPolicy(),
         confirmation_engine=ConfirmationEngine(),
-        action_executor=ActionExecutor()
+        action_executor=action_executor  # Use executor with handlers
     )
     
     print("AI System initialized successfully!")
