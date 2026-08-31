@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from datetime import datetime
 import json
 
-from app.ai.intent_parser import IntentParser, Intent
+from app.ai.intent_parser import IntentCategory, IntentParser, Intent
 from app.ai.llm_provider import LLMProviderManager
 from app.ai.action_generator import ActionGenerator, GeneratedAction
 from app.ai.response_generator import ResponseGenerator, ResponseContext

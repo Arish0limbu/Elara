@@ -259,6 +259,25 @@ class ActionRegistry:
             }
         )
         
+        # Information actions
+        self.register_action(
+            action_id="get_time",
+            name="Get Time",
+            description="Get current time",
+            permission_level=PermissionLevel.SAFE,
+            command_type=CommandType.SAFE,
+            parameters={}
+        )
+        
+        self.register_action(
+            action_id="get_system_info",
+            name="Get System Info",
+            description="Get system information",
+            permission_level=PermissionLevel.SAFE,
+            command_type=CommandType.SAFE,
+            parameters={}
+        )
+        
         self.logger.info(f"Registered {len(self._actions)} built-in actions")
     
     def register_action(

@@ -217,7 +217,7 @@ def test_response_generator():
         # Test success response
         success_response = generator.generate_success_response(generated_action, {"success": True})
         assert len(success_response) > 0, "Should have success response"
-        print(f"  - Success response passed: '{success_response[:50)}...'")
+        print(f"  - Success response passed: '{success_response[:50]}...'")
         
         # Test error response
         error_response = generator.generate_error_response(generated_action, "Test error")
@@ -294,6 +294,8 @@ def test_ai_manager():
         
     except Exception as e:
         print(f"AI manager test failed: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 def test_end_to_end_ai_pipeline():
