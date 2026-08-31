@@ -302,6 +302,10 @@ class LifecycleManager:
             self.action_executor.register_handler("open_url", self._handle_open_url)
             self.action_executor.register_handler("browser_search", self._handle_browser_search)
             
+            # Information handlers
+            self.action_executor.register_handler("get_time", self._handle_get_time)
+            self.action_executor.register_handler("get_system_info", self._handle_get_system_info)
+            
             self.logger.info("Action handlers registered")
             
         except Exception as e:
@@ -447,6 +451,20 @@ class LifecycleManager:
             success = self.application_manager.open_url(search_url)
             return {"search_performed": success}
         return {"search_performed": False}
+    
+    def _handle_get_time(self) -> dict:
+        """Handle get time action."""
+        from datetime import datetime
+        current_time = datetime.now().strftime("%H:%M:%S")
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        return {"time": current_time, "date": current_date}
+    
+    def _handle_get_system_info(self) -> dict:
+        """Handle get system info action."""
+        if self.system_operations:
+            info = self.system_operations.get_system_info()
+            return {"system_info": info}
+        return {"system_info": None}
     
     def _startup_phase_authentication(self) -> None:
         """Initialize authentication components."""

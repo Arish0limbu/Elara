@@ -159,6 +159,7 @@ class IntentParser:
             IntentCategory.FILE: [
                 (r"(?:open|go\s+to|navigate\s+to)\s+(?:my\s+)?(.+?)(?:\s+folder)?(?:\s+for\s+me)?\s*$", IntentAction.OPEN_FOLDER),
                 (r"(?:create|make|new)\s+(?:a\s+)?(?:folder|directory)\s+(?:called|named)?\s*(.+?)(?:\s+for\s+me)?\s*$", IntentAction.CREATE_FOLDER),
+                (r"open\s+(.+?)(?:\s+folder)?$", IntentAction.OPEN_FOLDER),
             ],
             
             # Browser patterns

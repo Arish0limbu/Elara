@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from datetime import datetime
 import json
 
-from app.ai.intent_parser import IntentCategory, IntentParser, Intent
+from app.ai.intent_parser import IntentCategory, IntentAction, IntentParser, Intent
 from app.ai.llm_provider import LLMProviderManager
 from app.ai.action_generator import ActionGenerator, GeneratedAction
 from app.ai.response_generator import ResponseGenerator, ResponseContext
@@ -318,7 +318,7 @@ class AIManager:
             },
             "action_registry": {
                 "total_actions": len(self.action_registry.get_all_actions()),
-                "action_ids": list(self.action_registry.get_all_actions().keys())
+                "action_ids": [action.id for action in self.action_registry.get_all_actions()]
             },
             "security": {
                 "confirmation_required_critical": self.security_policy.get_policy_summary().get('require_confirmation_critical'),
