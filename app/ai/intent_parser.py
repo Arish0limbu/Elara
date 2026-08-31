@@ -133,11 +133,11 @@ class IntentParser:
             
             # Volume patterns
             IntentCategory.VOLUME: [
-                (r"(?:turn|volume)\s+(?:up|increase|raise)\s+(?:the\s+)?(?:volume)?(?:\s+by\s+(\d+)(?:%|percent)?)?$", IntentAction.VOLUME_UP),
-                (r"(?:turn|volume)\s+(?:down|decrease|lower)\s+(?:the\s+)?(?:volume)?(?:\s+by\s+(\d+)(?:%|percent)?)?$", IntentAction.VOLUME_DOWN),
-                (r"(?:set|turn)\s+(?:the\s+)?(?:volume\s+)?to\s+(\d+)(?:%|percent)?$", IntentAction.SET_VOLUME),
-                (r"(?:mute|silence)\s+(?:the\s+)?(?:audio|sound|volume)?$", IntentAction.MUTE),
-                (r"(?:unmute|un-silence)\s+(?:the\s+)?(?:audio|sound|volume)?$", IntentAction.UNMUTE),
+                (r"(?:turn|volume)?\s*(?:up|increase|raise)(?:\s+(?:the\s+)?(?:volume|audio|sound))?(?:\s+by\s+(\d+)(?:%|percent)?)?$", IntentAction.VOLUME_UP),
+                (r"(?:turn|volume)?\s*(?:down|decrease|lower)(?:\s+(?:the\s+)?(?:volume|audio|sound))?(?:\s+by\s+(\d+)(?:%|percent)?)?$", IntentAction.VOLUME_DOWN),
+                (r"(?:set|turn)?\s*(?:the\s+)?(?:volume|audio|sound)?\s+(?:to\s+)?(\d+)(?:%|percent)?$", IntentAction.SET_VOLUME),
+                (r"(?:mute|silence)(?:\s+(?:the\s+)?(?:audio|sound|volume))?$", IntentAction.MUTE),
+                (r"(?:unmute|un-silence)(?:\s+(?:the\s+)?(?:audio|sound|volume))?$", IntentAction.UNMUTE),
             ],
             
             # Screenshot patterns

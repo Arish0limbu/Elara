@@ -340,6 +340,18 @@ class ActionRegistry:
         
         return None
     
+    def action_exists(self, action_id: str) -> bool:
+        """
+        Check if an action exists.
+        
+        Args:
+            action_id: Action ID or alias
+            
+        Returns:
+            True if action exists
+        """
+        return self.get_action(action_id) is not None
+    
     def get_all_actions(self) -> List[Action]:
         """Get all registered actions."""
         return list(self._actions.values())
