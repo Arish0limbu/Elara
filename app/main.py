@@ -239,9 +239,27 @@ class ElaraApp(QObject):
         if start:
             self.voice_loop.start_listening()
             self.logger.info("Voice listening started from UI")
+            
+            # Speak greeting when listening starts
+            if self.voice_loop.tts:
+                try:
+                    greeting = "I'm listening. Please say your command."
+                    self.voice_loop.speak(greeting)
+                    self.logger.info(f"Spoke listening greeting: '{greeting}'")
+                except Exception as e:
+                    self.logger.error(f"Error speaking listening greeting: {e}")
         else:
             self.voice_loop.stop_listening()
             self.logger.info("Voice listening stopped from UI")
+            
+            # Speak goodbye when listening stops
+            if self.voice_loop.tts:
+                try:
+                    goodbye = "Voice listening stopped."
+                    self.voice_loop.speak(goodbye)
+                    self.logger.info(f"Spoke listening stopped: '{goodbye}'")
+                except Exception as e:
+                    self.logger.error(f"Error speaking listening stopped: {e}")
     
     def _on_ui_command(self, command: str):
         """Handle command from UI."""
@@ -270,6 +288,13 @@ class ElaraApp(QObject):
                     error = response.action_result.get("error", "Unknown error")
                     self.main_window.show_error(error)
             
+            # Speak response (always speak for UI commands)
+            if self.voice_loop and response.response_text:
+                try:
+                    self.voice_loop.speak(response.response_text)
+                except Exception as e:
+                    self.logger.error(f"Error speaking response: {e}")
+            
             # Reset status
             self.main_window.set_status(AssistantStatus.IDLE)
         
@@ -282,6 +307,20 @@ class ElaraApp(QObject):
         """Handle status change from UI."""
         self.logger.info(f"Status changed: {status}")
         # Could trigger additional status handling here
+    
+    def _speak_activation_greeting(self):
+        """Speak activation greeting when ELARA starts."""
+        if self.voice_loop and self.voice_loop.tts:
+            try:
+                greeting = "System activated. Hello sir, welcome back."
+                self.logger.info(f"Speaking activation greeting: '{greeting}'")
+                self.voice_loop.speak(greeting)
+                
+                # Also add to conversation display
+                if self.main_window:
+                    self.main_window.add_response(greeting)
+            except Exception as e:
+                self.logger.error(f"Error speaking activation greeting: {e}")
     
     def _on_voice_command(self, command: str):
         """Handle command from voice loop."""
@@ -362,6 +401,9 @@ class ElaraApp(QObject):
                 self._connect_ui_signals()
                 self.main_window.show()
                 self.logger.info("Main window displayed")
+                
+                # Speak activation greeting
+                self._speak_activation_greeting()
             else:
                 self.logger.warning("PySide6 not available, running in headless mode")
             

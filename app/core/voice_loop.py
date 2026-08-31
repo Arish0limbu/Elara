@@ -135,6 +135,8 @@ class VoiceLoop:
         """Listen for wake word."""
         if not self.wake_word_detector:
             self.logger.warning("Wake word detector not available, skipping wake word detection")
+            # Skip to command listening directly
+            self._wake_word_detected = True
             return
         
         self._is_listening_for_wake_word = True
@@ -148,12 +150,20 @@ class VoiceLoop:
                 self.logger.info(f"Wake word detected: '{wake_word}' with confidence {confidence:.2f}")
                 self._wake_word_detected = True
                 self._stop_event.set()  # Signal to exit wake word listening
+                
+                # Speak acknowledgment
+                if self.tts:
+                    try:
+                        self.tts.speak("Yes, I'm listening. How can I help you?")
+                        self.logger.info("Spoke wake word acknowledgment")
+                    except Exception as e:
+                        self.logger.error(f"Error speaking wake word acknowledgment: {e}")
             
             # Start wake word listening with callback
             self.wake_word_detector.start_listening(callback=on_wake_word_detected)
             
             # Wait for wake word detection or timeout
-            timeout = 30.0  # Listen for 30 seconds max
+            timeout = 15.0  # Listen for 15 seconds max (reduced from 30 for better responsiveness)
             start_time = time.time()
             
             while time.time() - start_time < timeout and not self._stop_event.is_set():
@@ -170,9 +180,13 @@ class VoiceLoop:
                 self.logger.info("Wake word confirmed, transitioning to command listening")
             else:
                 self.logger.info("Wake word timeout, continuing to listen")
+                # For better responsiveness, still try to listen for command
+                self._wake_word_detected = True
                 
         except Exception as e:
             self.logger.error(f"Error listening for wake word: {e}")
+            # Even if wake word fails, continue to command listening
+            self._wake_word_detected = True
         
         finally:
             self._is_listening_for_wake_word = False
@@ -187,8 +201,8 @@ class VoiceLoop:
         self.logger.info("Listening for command...")
         
         try:
-            # Record audio for command
-            command_timeout = 10.0  # Listen for command for 10 seconds
+            # Record audio for command (shorter timeout for better responsiveness)
+            command_timeout = 5.0  # Listen for command for 5 seconds
             audio_data = self.microphone.record_audio(duration=command_timeout)
             
             if not audio_data:

@@ -54,41 +54,37 @@ class TextToSpeech:
             if self._is_loaded:
                 return True
             
-            try:
-                # Try to load Piper TTS
-                try:
-                    # Placeholder for actual Piper implementation
-                    # import PiperVoice
-                    
-                    self.logger.info(f"Loading Piper TTS model: {self.model_name}")
-                    
-                    # Initialize model (placeholder for actual Piper implementation)
-                    # In production, this would download and load the actual model
-                    # self._model = PiperVoice.load(self.model_name)
-                    
-                    self._is_loaded = True
-                    self.logger.info("Piper TTS model loaded successfully")
-                    return True
-                    
-                except ImportError:
-                    self.logger.warning("Piper TTS not installed. Install with: pip install piper-tts")
-                    raise ImportError("Piper TTS not available")
-                    
-            except Exception as e:
-                self.logger.warning(f"Piper TTS not available: {e}")
-                # Fallback to system TTS
-                self._setup_fallback_tts()
-                self._is_loaded = True
-                return True
+            # Directly use fallback TTS for better speech quality
+            self._setup_fallback_tts()
+            self._is_loaded = True
+            return True
     
     def _setup_fallback_tts(self):
         """Setup fallback TTS using system capabilities."""
         try:
             import pyttsx3
             self._fallback_engine = pyttsx3.init()
-            self._fallback_engine.setProperty('rate', 150)  # Speed
+            self._fallback_engine.setProperty('rate', 170)  # Slightly faster for more natural female voice
+            self._fallback_engine.setProperty('volume', 0.9)  # Volume
+            
+            # Set female voice
+            voices = self._fallback_engine.getProperty('voices')
+            for voice in voices:
+                # Look for female voice (typically contains "female" or "zira" or similar)
+                if 'female' in voice.name.lower() or 'zira' in voice.name.lower() or 'david' not in voice.name.lower():
+                    self._fallback_engine.setProperty('voice', voice.id)
+                    self.logger.info(f"Using female voice: {voice.name}")
+                    break
+            else:
+                # If no female voice found, use second voice (often female on Windows)
+                if len(voices) > 1:
+                    self._fallback_engine.setProperty('voice', voices[1].id)
+                    self.logger.info(f"Using voice: {voices[1].name}")
+                else:
+                    self.logger.info(f"Using default voice: {voices[0].name}")
+            
             self._use_fallback = True
-            self.logger.info("Using fallback TTS (pyttsx3)")
+            self.logger.info("Using fallback TTS (pyttsx3) with female voice")
         except ImportError:
             self.logger.warning("Fallback TTS not available, using dummy audio")
             self._use_fallback = False
@@ -210,7 +206,30 @@ class TextToSpeech:
             return False
         
         try:
-            # Synthesize audio
+            # Use fallback engine directly if available
+            if self._use_fallback and self._fallback_engine is not None:
+                self._is_speaking = True
+                self._stop_event.clear()
+                
+                def speak_with_fallback():
+                    try:
+                        self._fallback_engine.say(text)
+                        self._fallback_engine.runAndWait()
+                    except Exception as e:
+                        self.logger.error(f"Fallback speech failed: {e}")
+                    finally:
+                        self._is_speaking = False
+                        if callback:
+                            callback()
+                
+                # Start playback in thread
+                thread = threading.Thread(target=speak_with_fallback, daemon=True)
+                thread.start()
+                
+                self.logger.info(f"Speaking: {text[:50]}...")
+                return True
+            
+            # Otherwise, synthesize audio and play
             audio = self.synthesize(text)
             if audio is None:
                 if callback:

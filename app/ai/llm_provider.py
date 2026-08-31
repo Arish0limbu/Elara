@@ -298,6 +298,24 @@ class MockProvider(LLMProviderBase):
             return "Your computer is running Windows. You can ask me to perform specific actions like opening applications, managing windows, or controlling volume."
         elif "help" in prompt_lower:
             return "I can help you with: opening applications, managing windows, controlling volume, taking screenshots, system operations, file management, and web searches. Just ask me what you'd like to do!"
+        elif "hello" in prompt_lower or "hi" in prompt_lower:
+            return "Hello! I'm ELARA, your personal voice assistant. How can I help you today?"
+        elif "thank" in prompt_lower:
+            return "You're welcome! Is there anything else I can help you with?"
+        elif "open" in prompt_lower:
+            return "I can help you open applications. Please specify which application you'd like me to open, such as notepad, calculator, or browser."
+        elif "close" in prompt_lower:
+            return "I can help you close applications. Please specify which application you'd like me to close."
+        elif "screenshot" in prompt_lower:
+            return "I'll take a screenshot for you right now."
+        elif "volume" in prompt_lower:
+            return "I can help you control the volume. You can ask me to increase, decrease, mute, or unmute the volume."
+        elif "shutdown" in prompt_lower or "restart" in prompt_lower:
+            return "I can help you with system operations. Please confirm if you want me to proceed with this action."
+        elif "test" in prompt_lower:
+            return "This is a test response. I can hear you and I'm responding through voice."
+        elif "can you hear me" in prompt_lower:
+            return "Yes, I can hear you! I'm listening and ready to help you with your commands."
         else:
             return "I understand your request. This is a mock response since no AI provider is configured. Please configure an API key for a real AI provider to get intelligent responses."
     

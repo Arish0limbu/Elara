@@ -211,4 +211,4 @@ if __name__ == "__main__":
     test_integration.test_voice_to_text_command_processing()
     test_integration.test_voice_loop_with_ui_signals()
     
-    print("\n✅ All voice integration tests passed!")
+    print("\n[SUCCESS] All voice integration tests passed!")

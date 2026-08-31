@@ -100,6 +100,33 @@ class AIManager:
         self.logger.info(f"Processing request: '{request.user_input}'")
         
         try:
+            # Check if this is a simple conversational greeting (bypass action system)
+            conversational_responses = {
+                "hello": "Hello! I'm ELARA, your personal voice assistant. How can I help you today?",
+                "hi": "Hi there! I'm ELARA, your personal voice assistant. How can I help you?",
+                "hey": "Hey! I'm ELARA, your personal voice assistant. How can I help you?",
+                "thank": "You're welcome! Is there anything else I can help you with?",
+                "thanks": "You're welcome! Is there anything else I can help you with?",
+                "bye": "Goodbye! Have a great day!",
+                "goodbye": "Goodbye! Have a great day!",
+                "test": "This is a test response. I can hear you and I'm responding through voice.",
+                "can you hear me": "Yes, I can hear you! I'm listening and ready to help you with your commands."
+            }
+            
+            # Check for simple conversational input
+            input_lower = request.user_input.lower().strip()
+            for key, response in conversational_responses.items():
+                if key in input_lower:
+                    self.logger.info(f"Conversational response for: '{request.user_input}'")
+                    return AIResponse(
+                        response_text=response,
+                        generated_action=None,
+                        action_result=None,
+                        was_executed=False,
+                        error=None,
+                        request_id=request.request_id
+                    )
+            
             # Step 1: Parse intent
             intent = self.intent_parser.parse(request.user_input)
             self.logger.info(f"Parsed intent: {intent.category.value}/{intent.action.value}")
@@ -110,9 +137,17 @@ class AIManager:
             
             # Step 3: Validate action
             if not generated_action.is_valid:
-                error = f"Invalid action: {', '.join(generated_action.validation_errors)}"
-                self.logger.warning(error)
-                return self._create_error_response(request, generated_action, error)
+                # For invalid actions, just generate a conversational response
+                self.logger.warning(f"Invalid action: {', '.join(generated_action.validation_errors)}")
+                response_text = self.llm_manager.generate_response(request.user_input)
+                return AIResponse(
+                    response_text=response_text,
+                    generated_action=None,
+                    action_result=None,
+                    was_executed=False,
+                    error=None,
+                    request_id=request.request_id
+                )
             
             # Step 4: Check permissions
             from app.config.constants import PermissionLevel

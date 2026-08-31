@@ -15,7 +15,7 @@ try:
         QSizePolicy, QSplitter
     )
     from PySide6.QtCore import Qt, QTimer, Signal, Slot
-    from PySide6.QtGui import QFont, QColor, QPalette
+    from PySide6.QtGui import QFont, QColor, QPalette, QTextCursor
     PYSIDE6_AVAILABLE = True
 except ImportError:
     PYSIDE6_AVAILABLE = False
@@ -130,6 +130,20 @@ class MainWindow(QMainWindow):
         group = QGroupBox("Status")
         layout = QVBoxLayout()
         
+        # Listening animation indicator
+        listening_layout = QHBoxLayout()
+        self.listening_indicator = QLabel("🔴")
+        self.listening_indicator.setFont(QFont("Arial", 32))
+        self.listening_indicator.setStyleSheet("color: #ff0000;")
+        listening_layout.addWidget(self.listening_indicator)
+        
+        self.listening_status = QLabel("Not Listening")
+        self.listening_status.setFont(QFont("Arial", 14, QFont.Bold))
+        self.listening_status.setStyleSheet("color: #888888;")
+        listening_layout.addWidget(self.listening_status)
+        listening_layout.addStretch()
+        layout.addLayout(listening_layout)
+        
         # Assistant state
         state_layout = QHBoxLayout()
         state_layout.addWidget(QLabel("State:"))
@@ -183,18 +197,9 @@ class MainWindow(QMainWindow):
         self.conversation_display.setPlaceholderText("Your conversation with ELARA will appear here...")
         layout.addWidget(self.conversation_display)
         
-        # Input field
-        input_layout = QHBoxLayout()
-        self.command_input = QTextEdit()
-        self.command_input.setMaximumHeight(60)
-        self.command_input.setPlaceholderText("Type a command or press the microphone button...")
-        input_layout.addWidget(self.command_input)
+        # Remove text input - voice only
+        # Keep the display clean for voice interaction
         
-        self.send_button = QPushButton("Send")
-        self.send_button.clicked.connect(self._on_send_command)
-        input_layout.addWidget(self.send_button)
-        
-        layout.addLayout(input_layout)
         group.setLayout(layout)
         return group
     
@@ -202,32 +207,49 @@ class MainWindow(QMainWindow):
         """Create control buttons."""
         layout = QHBoxLayout()
         
-        # Microphone button
-        self.mic_button = QPushButton("🎤 Start Listening")
+        # Large microphone button for voice interaction
+        self.mic_button = QPushButton("🎤 START LISTENING")
         self.mic_button.setCheckable(True)
+        self.mic_button.setFixedSize(250, 70)
+        self.mic_button.setStyleSheet("""
+            QPushButton {
+                background-color: #00aa00;
+                color: #fff;
+                border: 3px solid #00ff00;
+                border-radius: 15px;
+                font-size: 18px;
+                font-weight: bold;
+                padding: 15px 30px;
+            }
+            QPushButton:hover {
+                background-color: #00cc00;
+            }
+            QPushButton:checked {
+                background-color: #ff6600;
+                border-color: #ff9900;
+            }
+        """)
         self.mic_button.clicked.connect(self._on_mic_button_clicked)
         layout.addWidget(self.mic_button)
         
         layout.addStretch()
         
-        # Mute button
-        self.mute_button = QPushButton("🔊 Mute")
-        self.mute_button.setCheckable(True)
-        self.mute_button.clicked.connect(self._on_mute_button_clicked)
-        layout.addWidget(self.mute_button)
-        
-        # Screenshot button
-        self.screenshot_button = QPushButton("📷 Screenshot")
-        self.screenshot_button.clicked.connect(self._on_screenshot_clicked)
-        layout.addWidget(self.screenshot_button)
-        
-        # Settings button
-        self.settings_button = QPushButton("⚙ Settings")
-        self.settings_button.clicked.connect(self._on_settings_clicked)
-        layout.addWidget(self.settings_button)
-        
-        # Quit button
-        self.quit_button = QPushButton("✕ Quit")
+        # Simple quit button
+        self.quit_button = QPushButton("✕")
+        self.quit_button.setFixedSize(50, 50)
+        self.quit_button.setStyleSheet("""
+            QPushButton {
+                background-color: #444;
+                color: #fff;
+                border: 2px solid #666;
+                border-radius: 25px;
+                font-size: 20px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #666;
+            }
+        """)
         self.quit_button.clicked.connect(self.close)
         layout.addWidget(self.quit_button)
         
@@ -301,12 +323,35 @@ class MainWindow(QMainWindow):
         self.status_timer = QTimer()
         self.status_timer.timeout.connect(self._update_status_display)
         self.status_timer.start(1000)  # Update every second
+        
+        # Listening animation timer
+        self.listening_timer = QTimer()
+        self.listening_timer.timeout.connect(self._animate_listening)
+        self.listening_animation_state = 0
+        self.listening_timer.start(500)  # Animate every 500ms
     
     def _update_status_display(self):
         """Update status display."""
         # Update time
         current_time = datetime.now().strftime("%H:%M:%S")
         self.status_bar.showMessage(f"ELARA - {current_time} - {self.current_status.value}")
+    
+    def _animate_listening(self):
+        """Animate listening indicator when listening."""
+        if self.current_status == AssistantStatus.LISTENING:
+            # Cycle through different states for animation
+            self.listening_animation_state = (self.listening_animation_state + 1) % 4
+            states = ["🔴", "🟠", "🟡", "🟢"]
+            self.listening_indicator.setText(states[self.listening_animation_state])
+        elif self.current_status == AssistantStatus.PROCESSING:
+            self.listening_indicator.setText("🔵")
+            self.listening_indicator.setStyleSheet("color: #0066ff;")
+        elif self.current_status == AssistantStatus.SPEAKING:
+            self.listening_indicator.setText("🟣")
+            self.listening_indicator.setStyleSheet("color: #9900ff;")
+        else:
+            self.listening_indicator.setText("🔴")
+            self.listening_indicator.setStyleSheet("color: #ff0000;")
     
     def _on_send_command(self):
         """Handle send button click."""
@@ -389,9 +434,9 @@ class MainWindow(QMainWindow):
         
         # Add to display with color
         cursor = self.conversation_display.textCursor()
-        self.conversation_display.moveCursor(cursor.End)
+        self.conversation_display.moveCursor(QTextCursor.End)
         self.conversation_display.insertHtml(f'<span style="color: {color};">{entry}</span>')
-        self.conversation_display.moveCursor(cursor.End)
+        self.conversation_display.moveCursor(QTextCursor.End)
         self.conversation_display.ensureCursorVisible()
     
     def add_response(self, response: str):
